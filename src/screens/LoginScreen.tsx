@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, SafeAreaView, KeyboardAvoidingView, Platform } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, SafeAreaView, KeyboardAvoidingView, Platform, DeviceEventEmitter } from 'react-native';
 import { loginUser } from '../lib/storage';
 
 export const LoginScreen = ({ navigation }: any) => {
@@ -13,6 +13,7 @@ export const LoginScreen = ({ navigation }: any) => {
     }
     const success = await loginUser(username, password);
     if (success) {
+      DeviceEventEmitter.emit('SHOW_TOAST', { message: 'Login Successfully! 👋' });
       navigation.replace('Main');
     } else {
       Alert.alert('Error', 'Invalid username or password');

@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, SafeAreaView, ScrollView, TouchableOpacity, Modal, TextInput, Dimensions } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { getCurrentUser, getLifeBalanceScore, submitReflection, calculateBMI, getBMICategory, logBMICheck } from '../lib/storage';
-import { ProgressChart, LineChart } from 'react-native-chart-kit';
+import { ProgressChart, LineChart, BarChart } from 'react-native-chart-kit';
 import { DeviceEventEmitter } from 'react-native';
 
 const screenWidth = Dimensions.get('window').width;
@@ -72,11 +72,13 @@ export const DashboardScreen = ({ navigation }: any) => {
     setShowReflection(false);
   };
 
-  // Convert radar to ProgressChart with vibrant multi-colors
-  const chartData = {
-    labels: balance.radar.map((r: any) => r.subject), 
-    data: balance.radar.map((r: any) => r.A / 100), // 0-1 scale
-    colors: ['#ef4444', '#10b981', '#3b82f6', '#f59e0b'] // Red, Green, Blue, Yellow
+  // Convert radar to BarChart for clearer understanding
+  const balanceChartData = {
+    labels: balance.radar.map((r: any) => r.subject.substring(0, 4)), 
+    datasets: [{
+      data: balance.radar.map((r: any) => r.A),
+      colors: [(opacity = 1) => '#ef4444', (opacity = 1) => '#10b981', (opacity = 1) => '#3b82f6', (opacity = 1) => '#f59e0b']
+    }]
   };
 
   return (
@@ -161,30 +163,24 @@ export const DashboardScreen = ({ navigation }: any) => {
           </View>
           <Text style={styles.reasonText}>{balance.reason}</Text>
           
-          <View style={styles.chartWrapper}>
-          {balance.radar.length > 0 && (
-            <ProgressChart
-              data={chartData}
-              width={screenWidth - 90}
-              height={200}
-              strokeWidth={14}
-              radius={32}
-              chartConfig={{
-                backgroundColor: '#111827',
-                backgroundGradientFrom: '#111827',
-                backgroundGradientTo: '#111827',
-                decimalPlaces: 0,
-                color: (opacity = 1, index) => {
-                   const colors = ['#ef4444', '#10b981', '#3b82f6', '#f59e0b'];
-                   return index !== undefined ? colors[index] : `rgba(139, 92, 246, ${opacity})`;
-                },
-                labelColor: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`
-              }}
-              hideLegend={false}
-              withCustomBarColorFromData={true}
-              style={{ borderRadius: 16 }}
-            />
-          )}
+          <View style={styles.matrixGrid}>
+            {balance.radar.map((item: any, index: number) => {
+              const colors = ['#ef4444', '#10b981', '#3b82f6', '#f59e0b'];
+              const icons = ['heart-pulse', 'briefcase-check', 'brain', 'account-group'];
+              const color = colors[index];
+              return (
+                <View key={index} style={styles.matrixItem}>
+                   <View style={styles.matrixHeader}>
+                      <MaterialCommunityIcons name={icons[index] as any} size={20} color={color} />
+                      <Text style={[styles.matrixLabel, { color }]}>{item.subject}</Text>
+                   </View>
+                   <Text style={styles.matrixValue}>{item.A}%</Text>
+                   <View style={styles.progressBg}>
+                      <View style={[styles.progressFill, { width: `${item.A}%`, backgroundColor: color }]} />
+                   </View>
+                </View>
+              );
+            })}
           </View>
         </View>
 
@@ -196,8 +192,8 @@ export const DashboardScreen = ({ navigation }: any) => {
                labels: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
                datasets: [{ data: [10, 45, 28, 80, 99, 43, 60] }]
              }}
-             width={screenWidth - 88}
-             height={180}
+             width={screenWidth - 40}
+             height={200}
              chartConfig={{
                backgroundColor: "#ffffff",
                backgroundGradientFrom: "#ffffff",
@@ -208,7 +204,7 @@ export const DashboardScreen = ({ navigation }: any) => {
                propsForDots: { r: "5", strokeWidth: "2", stroke: "#8B5CF6" }
              }}
              bezier
-             style={{ marginVertical: 8, borderRadius: 16, marginLeft: -10 }}
+             style={{ marginVertical: 8, borderRadius: 24 }}
            />
         </View>
 
@@ -283,8 +279,14 @@ const styles = StyleSheet.create({
   balanceTitle: { color: '#fff', fontSize: 18, fontWeight: '800' },
   scoreText: { color: '#8B5CF6', fontSize: 24, fontWeight: '900' },
   reasonText: { color: '#9CA3AF', fontSize: 14, marginBottom: 20, fontStyle: 'italic' },
+  matrixGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 12, marginTop: 10 },
+  matrixItem: { width: '48%', backgroundColor: 'rgba(255,255,255,0.05)', padding: 16, borderRadius: 20, borderWeight: 1, borderColor: 'rgba(255,255,255,0.1)' },
+  matrixHeader: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 8 },
+  matrixLabel: { fontSize: 13, fontWeight: '800', textTransform: 'uppercase' },
+  matrixValue: { fontSize: 22, fontWeight: '900', color: '#fff', marginBottom: 10 },
+  progressBg: { height: 6, backgroundColor: 'rgba(255,255,255,0.1)', borderRadius: 3, overflow: 'hidden' },
+  progressFill: { height: '100%', borderRadius: 3 },
   sectionTitle: { fontSize: 18, fontWeight: '800', color: '#1F2937', marginBottom: 16, marginLeft: 4 },
-  chartWrapper: { alignItems: 'center', marginTop: 10 },
   modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.6)', justifyContent: 'flex-end' },
   modalContent: { backgroundColor: '#fff', borderTopLeftRadius: 24, borderTopRightRadius: 24, padding: 24, minHeight: 400 },
   modalTitle: { fontSize: 22, fontWeight: '800', marginBottom: 20, color: '#111827', textAlign: 'center' },

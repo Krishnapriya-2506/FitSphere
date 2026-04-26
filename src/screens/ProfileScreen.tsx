@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, SafeAreaView, ScrollView, Alert } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, SafeAreaView, ScrollView, Alert, TextInput } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { getCurrentUser, saveUser, getGamificationRank } from '../lib/storage';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -157,6 +157,9 @@ export const ProfileScreen = ({ navigation }: any) => {
                 <View style={{backgroundColor: '#fff', padding: 24, borderRadius: 24}}>
                     <Text style={{fontSize: 20, fontWeight: '900', marginBottom: 20, color: '#111827'}}>Edit Details</Text>
                     
+                    <Text style={{fontWeight: '700', marginBottom: 6, color: '#4B5563'}}>Full Name</Text>
+                    <TextInput style={styles.editInput} value={editData.fullName} onChangeText={t => setEditData({...editData, fullName: t})} />
+
                     <Text style={{fontWeight: '700', marginBottom: 6, color: '#4B5563'}}>Height (cm)</Text>
                     <TextInput style={styles.editInput} value={editData.height} onChangeText={t => setEditData({...editData, height: t})} keyboardType="numeric" />
                     

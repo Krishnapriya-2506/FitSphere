@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, ScrollView, SafeAreaView, KeyboardAvoidingView, Platform, Modal, FlatList } from 'react-native';
-import { saveUser } from '../lib/storage';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, ScrollView, SafeAreaView, KeyboardAvoidingView, Platform, Modal, FlatList, DeviceEventEmitter } from 'react-native';
+import { saveUser, loginUser } from '../lib/storage';
 import { Ionicons } from '@expo/vector-icons';
 
 const CustomPicker = ({ label, value, options, onSelect }: any) => {
@@ -101,9 +101,10 @@ export const RegisterScreen = ({ navigation }: any) => {
     };
     
     await saveUser(newUser);
-    Alert.alert('Success', 'Registration Complete', [
-      { text: 'OK', onPress: () => navigation.replace('Login') }
-    ]);
+    await loginUser(newUser.username, newUser.password);
+    
+    DeviceEventEmitter.emit('SHOW_TOAST', { message: 'Successfully Registered! 🎉' });
+    navigation.replace('Main');
   };
 
   return (
@@ -133,7 +134,7 @@ export const RegisterScreen = ({ navigation }: any) => {
               </View>
             </View>
             
-            <CustomPicker label="Select Blood Group" value={form.bloodGroup} options={['A+', 'A-', 'B+', 'B-', 'O+', 'O-', 'AB+', 'AB-', 'A!+ve']} onSelect={(val: string) => setForm({...form, bloodGroup: val})} />
+            <CustomPicker label="Select Blood Group" value={form.bloodGroup} options={['A+', 'A-', 'B+', 'B-', 'O+', 'O-', 'AB+', 'AB-', 'A1+ve']} onSelect={(val: string) => setForm({...form, bloodGroup: val})} />
             <CustomPicker label="Select Goal" value={form.goal} options={['Weight Loss', 'Muscle Gain', 'Maintain', 'Fitness']} onSelect={(val: string) => setForm({...form, goal: val})} />
             
             <TagInput label="Allergic Foods" tags={allergies} setTags={setAllergies} color="#ef4444" bg="#fef2f2" />
